@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>OSINT Minimal</title>
+<title>Free Exam Revision PRO</title>
 
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
@@ -237,15 +237,35 @@ function addEdge(){
 }
 
 // ===== LOOKUPS =====
-function userSearch(){
-  let u=document.getElementById("user").value.trim();
-  if(!u) return;
+function userSearch() {
+  const username = document.getElementById("user").value.trim();
 
-  window.open("https://github.com/"+u);
-  window.open("https://www.instagram.com/"+u);
-  window.open("https://www.reddit.com/user/"+u);
-  window.open("https://x.com/"+u);
-  window.open("https://www.tiktok.com/@"+u);
+  if (!username) {
+    alert("Enter a username");
+    return;
+  }
+
+  const platforms = [
+    ["GitHub", `https://github.com/${username}`],
+    ["Instagram", `https://instagram.com/${username}`],
+    ["Reddit", `https://reddit.com/user/${username}`],
+    ["X", `https://x.com/${username}`],
+    ["TikTok", `https://www.tiktok.com/@${username}`],
+    ["YouTube", `https://www.youtube.com/@${username}`],
+    ["Roblox", `https://www.roblox.com/search/users?keyword=${username}`],
+    ["Twitch", `https://www.twitch.tv/${username}`],
+    ["Steam", `https://steamcommunity.com/id/${username}`],
+    ["Pinterest", `https://www.pinterest.com/${username}`],
+    ["Snapchat", `https://www.snapchat.com/add/${username}`]
+  ];
+
+  const results = document.getElementById("userResults");
+
+  results.innerHTML = platforms.map(([name,url]) => `
+    <a href="${url}" target="_blank" class="result-link">
+      ${name}
+    </a>
+  `).join("");
 }
 
 function ipSearch(){
