@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OSINT Minimal</title>
+
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<style>
+:root{
+  --bg:#0b0d10;
+  --panel:#11151b;
+  --muted:#8b949e;
+  --accent:#4f8cff;
+  --line:#1f2630;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:var(--bg);
+  color:#e6edf3;
+}
+
+/* Layout */
+.wrapper{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+  background:var(--panel);
+  border-right:1px solid var(--line);
+  padding:14px;
+}
+
+h1{
+  font-size:14px;
+  margin:0 0 12px;
+  color:#c9d1d9;
+  letter-spacing:1px;
+}
+
+.section{
+  margin-top:14px;
+  padding-top:10px;
+  border-top:1px solid var(--line);
+}
+
+input{
+  width:100%;
+  padding:8px;
+  margin-top:6px;
+  border:1px solid var(--line);
+  background:#0c1117;
+  color:white;
+  border-radius:6px;
+  font-size:12px;
+}
+
+button{
+  width:100%;
+  margin-top:8px;
+  padding:8px;
+  border:0;
+  border-radius:6px;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+  font-size:12px;
+}
+
+button:hover{opacity:.9}
+
+.linklist a{
+  display:block;
+  font-size:12px;
+  color:#9ecbff;
+  text-decoration:none;
+  margin:6px 0;
+}
+
+.linklist a:hover{
+  text-decoration:underline;
+}
+
+/* Main */
+.main{
+  display:grid;
+  grid-template-rows:60% 40%;
+}
+
+/* Graph */
+#network{
+  width:100%;
+  height:100%;
+  background:#0a0e13;
+}
+
+/* Tools grid */
+.tools{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line);
+}
+
+.box{
+  padding:10px;
+  border-right:1px solid var(--line);
+}
+
+.box:last-child{border-right:0}
+
+small{
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h1>🕵️ OSINT CORE</h1>
+
+    <div class="section">
+      <small>ENTITY</small>
+      <input id="node" placeholder="name / email / ip">
+      <button onclick="addNode()">Add</button>
+
+      <input id="from" placeholder="from">
+      <input id="to" placeholder="to">
+      <button onclick="addEdge()">Link</button>
+    </div>
+
+    <div class="section linklist">
+      <small>LOOKUP HUB</small>
+
+      <a href="https://www.shodan.io" target="_blank">Shodan</a>
+      <a href="https://haveibeenpwned.com" target="_blank">HaveIBeenPwned</a>
+      <a href="https://who.is" target="_blank">WHOIS</a>
+      <a href="https://lookup.icann.org" target="_blank">ICANN Lookup</a>
+      <a href="https://www.abuseipdb.com" target="_blank">AbuseIPDB</a>
+      <a href="https://intelx.io" target="_blank">IntelX</a>
+      <a href="https://www.virustotal.com" target="_blank">VirusTotal</a>
+      <a href="https://dnsdumpster.com" target="_blank">DNSDumpster</a>
+      <a href="https://crt.sh" target="_blank">Certificate Search</a>
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- GRAPH -->
+    <div id="network"></div>
+
+    <!-- TOOLS -->
+    <div class="tools">
+
+      <div class="box">
+        <small>USERNAME</small>
+        <input id="user">
+        <button onclick="userSearch()">Search</button>
+      </div>
+
+      <div class="box">
+        <small>IP</small>
+        <input id="ip">
+        <button onclick="ipSearch()">Lookup</button>
+      </div>
+
+      <div class="box">
+        <small>EMAIL</small>
+        <input id="email">
+        <button onclick="emailSearch()">Search</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+// ===== GRAPH =====
+let nodes = new vis.DataSet([]);
+let edges = new vis.DataSet([]);
+
+let network = new vis.Network(
+  document.getElementById("network"),
+  { nodes, edges },
+  {
+    nodes:{
+      shape:"dot",
+      size:10,
+      color:{ background:"#4f8cff", border:"#1f6feb" },
+      font:{ size:12, color:"#c9d1d9" }
+    },
+    edges:{
+      color:"#2d333b",
+      smooth:true
+    },
+    physics:{
+      stabilization:true,
+      barnesHut:{ gravitationalConstant:-2000 }
+    }
+  }
+);
+
+// Add node
+function addNode(){
+  let v=document.getElementById("node").value.trim();
+  if(!v) return;
+
+  nodes.add({ id:v, label:v });
+  document.getElementById("node").value="";
+}
+
+// Add edge
+function addEdge(){
+  let f=document.getElementById("from").value.trim();
+  let t=document.getElementById("to").value.trim();
+  if(!f||!t) return;
+
+  edges.add({from:f,to:t});
+  document.getElementById("from").value="";
+  document.getElementById("to").value="";
+}
+
+// ===== LOOKUPS =====
+function userSearch(){
+  let u=document.getElementById("user").value.trim();
+  if(!u) return;
+
+  window.open("https://github.com/"+u);
+  window.open("https://www.instagram.com/"+u);
+  window.open("https://www.reddit.com/user/"+u);
+  window.open("https://x.com/"+u);
+  window.open("https://www.tiktok.com/@"+u);
+}
+
+function ipSearch(){
+  let ip=document.getElementById("ip").value.trim();
+  if(!ip) return;
+
+  window.open("https://www.ipinfo.io/"+ip);
+  window.open("https://www.abuseipdb.com/check/"+ip);
+  window.open("https://www.virustotal.com/gui/ip-address/"+ip);
+}
+
+function emailSearch(){
+  let e=document.getElementById("email").value.trim();
+  if(!e) return;
+
+  window.open("https://www.google.com/search?q="+encodeURIComponent(e));
+  window.open("https://haveibeenpwned.com/search?email="+encodeURIComponent(e));
+  window.open("https://www.dehashed.com/search?query="+encodeURIComponent(e));
+}
+
+</script>
+
+</body>
+</html>
